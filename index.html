@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ThesisGuard AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --b900:#1a365d;--b700:#2b6cb0;--b500:#4299e1;--b200:#bee3f8;--b50:#ebf8ff;
+      --s700:#2d3748;--s500:#718096;--s300:#e2e8f0;--s100:#f7fafc;
+      --white:#fff;--g600:#276749;--g50:#f0fff4;--a600:#c05621;--r600:#c53030;--r50:#fff5f5;
+    }
+    body{font-family:'DM Sans',sans-serif;background:var(--s100);color:var(--s700);min-height:100vh}
+
+    /* HEADER */
+    header{background:var(--white);border-bottom:1px solid var(--s300);padding:0 2rem;
+      display:flex;align-items:center;gap:.75rem;height:64px;position:sticky;top:0;z-index:100;
+      box-shadow:0 1px 8px rgba(0,0,0,.06)}
+    .logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--b700),var(--b500));
+      border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+    .logo-name{font-family:'DM Serif Display',serif;font-size:1.2rem;color:var(--b900)}
+    .logo-badge{font-size:.62rem;font-weight:700;background:var(--b50);color:var(--b700);
+      border:1px solid var(--b200);border-radius:4px;padding:2px 6px;letter-spacing:.06em;text-transform:uppercase}
+    .header-tag{margin-left:auto;font-size:.75rem;color:var(--s500);
+      background:var(--s100);border:1px solid var(--s300);border-radius:99px;padding:3px 10px}
+
+    /* MAIN */
+    main{max-width:880px;margin:0 auto;padding:2.5rem 1.5rem 5rem}
+
+    /* HERO */
+    .hero{text-align:center;padding:2rem 0 2.5rem}
+    .hero h1{font-family:'DM Serif Display',serif;font-size:clamp(1.8rem,4vw,2.7rem);
+      color:var(--b900);line-height:1.2;margin-bottom:.7rem}
+    .hero h1 em{font-style:italic;color:var(--b700)}
+    .hero p{font-size:.95rem;color:var(--s500);max-width:500px;margin:0 auto 1.75rem;line-height:1.65}
+
+    /* TECH BADGE */
+    .tech-pills{display:flex;justify-content:center;gap:.5rem;flex-wrap:wrap;margin-bottom:1.75rem}
+    .pill{font-size:.72rem;font-weight:600;padding:4px 12px;border-radius:99px;letter-spacing:.04em}
+    .pill-blue{background:var(--b50);color:var(--b700);border:1px solid var(--b200)}
+    .pill-green{background:var(--g50);color:var(--g600);border:1px solid #9ae6b4}
+
+    /* UPLOAD */
+    .upload-card{background:var(--white);border:2px dashed var(--b200);border-radius:16px;
+      padding:2.5rem 2rem;text-align:center;transition:.2s;cursor:pointer;position:relative}
+    .upload-card:hover,.upload-card.drag-over{border-color:var(--b500);background:var(--b50)}
+    .upload-card input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+    .upload-icon{font-size:2.5rem;margin-bottom:.6rem}
+    .upload-card h3{font-size:.95rem;font-weight:600;color:var(--s700);margin-bottom:.3rem}
+    .upload-card p{font-size:.82rem;color:var(--s500)}
+    #file-name{margin-top:.6rem;font-size:.83rem;font-weight:500;color:var(--b700);min-height:1.2em}
+
+    /* BUTTONS */
+    .btn-row{display:flex;gap:.75rem;justify-content:center;margin-top:1.4rem;flex-wrap:wrap}
+    .btn{display:inline-flex;align-items:center;gap:.4rem;border:none;border-radius:8px;
+      padding:.65rem 1.4rem;font-size:.88rem;font-weight:500;font-family:'DM Sans',sans-serif;
+      cursor:pointer;transition:.15s}
+    .btn-primary{background:var(--b700);color:var(--white)}
+    .btn-primary:hover:not(:disabled){background:var(--b900)}
+    .btn-primary:disabled{opacity:.45;cursor:not-allowed}
+    .btn-outline{background:var(--white);color:var(--b700);border:1.5px solid var(--b200)}
+    .btn-outline:hover{background:var(--b50)}
+    .btn-green{background:var(--g50);color:var(--g600);border:1.5px solid #9ae6b4}
+    .btn-green:hover{background:#c6f6d5}
+    .btn-copy{background:transparent;color:var(--b500);border:1px solid var(--b200);
+      padding:.28rem .65rem;font-size:.75rem;border-radius:6px;font-family:'DM Sans',sans-serif;cursor:pointer}
+    .btn-copy:hover{background:var(--b50)}
+
+    /* LOADING */
+    #loading{display:none;text-align:center;padding:3.5rem 1rem}
+    .spinner{width:44px;height:44px;border:4px solid var(--b200);border-top-color:var(--b700);
+      border-radius:50%;animation:spin .85s linear infinite;margin:0 auto 1.2rem}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .loading-title{font-weight:600;font-size:1rem;color:var(--b900);margin-bottom:.5rem}
+    .loading-sub{font-size:.82rem;color:var(--s500)}
+    .step-list{margin-top:1rem;display:flex;flex-direction:column;gap:.35rem}
+    .step-item{font-size:.82rem;color:var(--s500);opacity:.4;transition:.3s}
+    .step-item.active{opacity:1;color:var(--b700);font-weight:500}
+    .step-item.done{opacity:.7;color:var(--g600)}
+
+    /* ERROR */
+    #err{display:none;background:var(--r50);border:1px solid #feb2b2;border-radius:10px;
+      padding:.9rem 1.1rem;margin-top:1rem;font-size:.86rem;color:var(--r600)}
+
+    /* RESULTS */
+    #results{display:none;animation:fadeIn .4s}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+    .result-header{display:flex;align-items:flex-start;justify-content:space-between;
+      flex-wrap:wrap;gap:1rem;margin-bottom:1.75rem;padding-bottom:1rem;border-bottom:1px solid var(--s300)}
+    .result-header h2{font-family:'DM Serif Display',serif;font-size:1.5rem;color:var(--b900)}
+    .result-meta{font-size:.78rem;color:var(--s500);margin-top:3px}
+
+    /* SCORES */
+    .score-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.9rem;margin-bottom:1.75rem}
+    .score-card{background:var(--white);border:1px solid var(--s300);border-radius:12px;
+      padding:1.1rem 1.2rem;position:relative;overflow:hidden}
+    .score-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--c,var(--b500))}
+    .sc-label{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--s500);margin-bottom:.4rem}
+    .sc-value{font-family:'DM Serif Display',serif;font-size:1.9rem;color:var(--b900);line-height:1}
+    .sc-value span{font-size:.85rem;color:var(--s500)}
+    .sc-bar-wrap{margin-top:.55rem;height:4px;background:var(--s300);border-radius:99px;overflow:hidden}
+    .sc-bar{height:100%;border-radius:99px;background:var(--c,var(--b500));transition:width 1.1s ease}
+    .sc-status{font-size:.72rem;font-weight:600;margin-top:.35rem}
+
+    /* SUMMARY */
+    .summary-box{background:var(--b50);border:1px solid var(--b200);border-radius:12px;
+      padding:1.3rem 1.4rem;margin-bottom:1.75rem}
+    .summary-box h3{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;
+      color:var(--b700);margin-bottom:.55rem;display:flex;align-items:center;gap:.4rem}
+    .summary-box p{font-size:.9rem;line-height:1.7;color:var(--s700)}
+
+    /* ETHICAL BANNER */
+    .ethics-bar{background:linear-gradient(135deg,#e6f3ff,#f0f7ff);border:1px solid var(--b200);
+      border-radius:12px;padding:.9rem 1.2rem;margin-bottom:1.75rem;display:flex;gap:.7rem;align-items:flex-start}
+    .ethics-bar-icon{font-size:1.2rem;flex-shrink:0;margin-top:1px}
+    .ethics-bar h4{font-size:.82rem;font-weight:700;color:var(--b900);margin-bottom:.2rem}
+    .ethics-bar p{font-size:.78rem;color:var(--s500);line-height:1.5}
+
+    /* SECTIONS */
+    .sec-block{background:var(--white);border:1px solid var(--s300);border-radius:12px;margin-bottom:1rem;overflow:hidden}
+    .sec-head{display:flex;align-items:center;justify-content:space-between;padding:.9rem 1.2rem;
+      cursor:pointer;user-select:none;transition:.15s}
+    .sec-head:hover{background:var(--s100)}
+    .sec-head-left{display:flex;align-items:center;gap:.55rem}
+    .sec-icon{font-size:1rem}
+    .sec-title{font-weight:600;font-size:.9rem;color:var(--b900)}
+    .sec-badge{font-size:.68rem;font-weight:700;padding:2px 9px;border-radius:99px}
+    .bg-green{background:#c6f6d5;color:var(--g600)}
+    .bg-amber{background:#feebc8;color:var(--a600)}
+    .bg-red{background:#fed7d7;color:var(--r600)}
+    .sec-chev{font-size:.75rem;color:var(--s500);transition:transform .2s}
+    .sec-block.open .sec-chev{transform:rotate(180deg)}
+    .sec-body{display:none;padding:0 1.2rem 1.2rem;border-top:1px solid var(--s300)}
+    .sec-block.open .sec-body{display:block}
+
+    /* TAGS */
+    .tag-row{display:flex;flex-wrap:wrap;gap:.4rem;margin:.65rem 0}
+    .tag{font-size:.72rem;font-weight:500;padding:3px 9px;border-radius:99px}
+    .tag-f{background:#c6f6d5;color:var(--g600)}
+    .tag-m{background:#fed7d7;color:var(--r600)}
+
+    /* ISSUE CARD */
+    .issue{border:1px solid var(--s300);border-radius:8px;margin-top:.8rem;overflow:hidden}
+    .issue-head{display:flex;gap:.5rem;padding:.7rem .9rem;background:var(--s100);align-items:flex-start}
+    .issue-dot{width:7px;height:7px;border-radius:50%;background:var(--a600);margin-top:5px;flex-shrink:0}
+    .issue-title{font-weight:500;font-size:.85rem;color:var(--s700);flex:1}
+    .issue-body{padding:.75rem .9rem}
+    .issue-orig{background:var(--r50);border-left:3px solid var(--r600);border-radius:0 4px 4px 0;
+      padding:.45rem .7rem;font-size:.8rem;color:#742a2a;font-style:italic;margin-bottom:.55rem}
+    .issue-why{font-size:.8rem;color:var(--s500);margin-bottom:.55rem;display:flex;gap:.35rem;line-height:1.5}
+
+    /* FIX TOGGLE */
+    .fix-btn{background:none;border:1px solid var(--b200);color:var(--b700);border-radius:6px;
+      padding:.28rem .75rem;font-size:.78rem;cursor:pointer;font-family:'DM Sans',sans-serif;
+      transition:.15s;margin-bottom:.5rem}
+    .fix-btn:hover{background:var(--b50)}
+    .fix-box{display:none;background:var(--g50);border:1px solid #9ae6b4;border-radius:8px;
+      padding:.7rem .9rem;margin-top:.3rem}
+    .fix-box.on{display:block;animation:fadeIn .2s}
+    .fix-label{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+      color:var(--g600);margin-bottom:.3rem}
+    .fix-text{font-size:.82rem;color:var(--g600);line-height:1.5;margin-bottom:.4rem}
+
+    .no-issues{text-align:center;padding:1.4rem;font-size:.87rem;color:var(--s500)}
+
+    @media(max-width:600px){
+      header{padding:0 1rem}
+      main{padding:1.5rem 1rem 3rem}
+      .score-grid{grid-template-columns:repeat(2,1fr)}
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo-icon">📄</div>
+  <span class="logo-name">ThesisGuard</span>
+  <span class="logo-badge">AI</span>
+  <span class="header-tag">⚡ LangChain + Gemini</span>
+</header>
+
+<main>
+
+  <!-- UPLOAD SECTION -->
+  <div id="upload-section">
+    <div class="hero">
+      <h1>Review your thesis<br><em>before it's too late.</em></h1>
+      <p>AI-powered feedback on structure, citations, grammar, and style — with clear explanations and suggested fixes for every issue found.</p>
+      <div class="tech-pills">
+        <span class="pill pill-blue">🔗 LangChain Agent</span>
+        <span class="pill pill-blue">✨ Google Gemini LLM</span>
+        <span class="pill pill-blue">🔬 Prompt Engineering</span>
+        <span class="pill pill-green">⚖️ Ethical AI</span>
+      </div>
+    </div>
+
+    <div class="upload-card" id="drop-zone">
+      <input type="file" id="file-input" accept=".pdf,.docx,.doc,.txt">
+      <div class="upload-icon">📂</div>
+      <h3>Drop your thesis here or click to browse</h3>
+      <p>Supports PDF, DOCX, and TXT files · Max 16MB</p>
+      <div id="file-name"></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" id="analyze-btn" disabled onclick="analyzeFile()">✨ Analyze My Thesis</button>
+      <button class="btn btn-outline" onclick="runDemo()">🎓 Try Sample Thesis</button>
+    </div>
+    <div id="err"></div>
+  </div>
+
+  <!-- LOADING -->
+  <div id="loading">
+    <div class="spinner"></div>
+    <div class="loading-title">ThesisGuard Agent is working…</div>
+    <div class="loading-sub">Running 5 LangChain analysis chains</div>
+    <div class="step-list">
+      <div class="step-item" id="s1">📖 Chain 1 — Parsing &amp; summarizing thesis</div>
+      <div class="step-item" id="s2">📐 Chain 2 — Analyzing structural flow</div>
+      <div class="step-item" id="s3">📚 Chain 3 — Checking citation consistency</div>
+      <div class="step-item" id="s4">✏️ Chain 4 — Grammar &amp; language analysis</div>
+      <div class="step-item" id="s5">🎨 Chain 5 — Writing style evaluation</div>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="results">
+    <div class="result-header">
+      <div>
+        <h2>Analysis Complete ✅</h2>
+        <div class="result-meta" id="result-meta"></div>
+      </div>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+        <button class="btn btn-outline" onclick="resetApp()">⬅ New Analysis</button>
+        <button class="btn btn-green" onclick="downloadReport()">⬇ Download Report</button>
+      </div>
+    </div>
+
+    <div class="score-grid" id="score-grid"></div>
+
+    <div class="summary-box">
+      <h3>📋 Thesis Summary</h3>
+      <p id="summary-text"></p>
+    </div>
+
+    <div class="ethics-bar">
+      <div class="ethics-bar-icon">⚖️</div>
+      <div>
+        <h4>Ethical AI Transparency</h4>
+        <p>Every suggestion below includes a <strong>Why this matters</strong> explanation. ThesisGuard doesn't just flag issues — it explains the academic reasoning. Click <strong>💡 Show Suggested Fix</strong> on any issue to see a ready-to-use correction you can copy directly into your thesis.</p>
+      </div>
+    </div>
+
+    <div id="feedback-sections"></div>
+  </div>
+
+</main>
+
+<script>
+  let currentId = null;
+
+  // ── File Handling ────────────────────────────────────────────────────
+  const fileInput = document.getElementById('file-input');
+  const analyzeBtn = document.getElementById('analyze-btn');
+  const fileNameEl = document.getElementById('file-name');
+  const dropZone = document.getElementById('drop-zone');
+
+  fileInput.addEventListener('change', () => {
+    if (fileInput.files[0]) { fileNameEl.textContent = '✅ ' + fileInput.files[0].name; analyzeBtn.disabled = false; }
+  });
+  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault(); dropZone.classList.remove('drag-over');
+    const f = e.dataTransfer.files[0];
+    if (f) { const dt = new DataTransfer(); dt.items.add(f); fileInput.files = dt.files; fileNameEl.textContent = '✅ ' + f.name; analyzeBtn.disabled = false; }
+  });
+
+  // ── Loading Steps ────────────────────────────────────────────────────
+  let stepTimer, stepIdx = 0;
+  const STEPS = ['s1','s2','s3','s4','s5'];
+
+  function startSteps() {
+    stepIdx = 0;
+    STEPS.forEach(s => { const el = document.getElementById(s); el.className = 'step-item'; });
+    document.getElementById(STEPS[0]).classList.add('active');
+    stepTimer = setInterval(() => {
+      document.getElementById(STEPS[stepIdx]).classList.replace('active','done');
+      stepIdx = (stepIdx + 1) % STEPS.length;
+      document.getElementById(STEPS[stepIdx]).classList.add('active');
+    }, 2400);
+  }
+  function stopSteps() { clearInterval(stepTimer); }
+
+  // ── Show / Hide ──────────────────────────────────────────────────────
+  function showLoading() {
+    document.getElementById('upload-section').style.display = 'none';
+    document.getElementById('results').style.display = 'none';
+    document.getElementById('loading').style.display = 'block';
+    document.getElementById('err').style.display = 'none';
+    startSteps();
+  }
+  function hideLoading() { stopSteps(); document.getElementById('loading').style.display = 'none'; }
+  function showError(msg) {
+    document.getElementById('upload-section').style.display = 'block';
+    const e = document.getElementById('err'); e.style.display = 'block'; e.textContent = '❌ ' + msg;
+  }
+
+  // ── API Calls ────────────────────────────────────────────────────────
+  async function analyzeFile() {
+    const file = fileInput.files[0]; if (!file) return;
+    showLoading();
+    const fd = new FormData(); fd.append('file', file);
+    try {
+      const res = await fetch('/analyze', { method:'POST', body:fd });
+      const data = await res.json();
+      if (data.error) { showError(data.error); return; }
+      currentId = data.analysis_id;
+      renderResults(data);
+    } catch(e) { showError('Connection error. Please try again.'); }
+    finally { hideLoading(); }
+  }
+
+  async function runDemo() {
+    showLoading();
+    try {
+      const res = await fetch('/demo', { method:'POST' });
+      const data = await res.json();
+      if (data.error) { showError(data.error); return; }
+      currentId = data.analysis_id;
+      renderResults(data);
+    } catch(e) { showError('Demo failed. Please try again.'); }
+    finally { hideLoading(); }
+  }
+
+  // ── Render Results ───────────────────────────────────────────────────
+  function renderResults(data) {
+    const r = data.results;
+    document.getElementById('result-meta').textContent = '📄 ' + data.filename + '  ·  Analyzed with LangChain + Gemini';
+
+    // Scores
+    const cats = [
+      { label:'📐 Structure', s: r.structure?.score||0 },
+      { label:'📚 Citations', s: r.citations?.score||0 },
+      { label:'✏️ Grammar',   s: r.grammar?.score||0   },
+      { label:'🎨 Style',     s: r.style?.score||0     },
+    ];
+    const overall = Math.round(cats.reduce((a,b)=>a+b.s,0)/cats.length);
+    cats.push({ label:'⭐ Overall', s: overall });
+
+    document.getElementById('score-grid').innerHTML = cats.map(c => {
+      const col = c.s>=80?'#38a169':c.s>=60?'#d97706':'#e53e3e';
+      const status = c.s>=80?'✅ Good':c.s>=60?'⚠️ Needs Work':'❌ Critical';
+      const scol = c.s>=80?'#276749':c.s>=60?'#c05621':'#c53030';
+      return `<div class="score-card" style="--c:${col}">
+        <div class="sc-label">${c.label}</div>
+        <div class="sc-value">${c.s}<span>/100</span></div>
+        <div class="sc-bar-wrap"><div class="sc-bar" style="width:${c.s}%"></div></div>
+        <div class="sc-status" style="color:${scol}">${status}</div>
+      </div>`;
+    }).join('');
+
+    // Summary
+    document.getElementById('summary-text').textContent = r.summary || 'Summary unavailable.';
+
+    // Sections
+    const sections = [
+      { title:'Structural Flow Analysis',   icon:'📐', score:r.structure?.score||0, data:r.structure,
+        extra: () => {
+          const f = r.structure?.sections_found||[], m = r.structure?.sections_missing||[];
+          if(!f.length && !m.length) return '';
+          return `<div class="tag-row">${f.map(s=>`<span class="tag tag-f">✓ ${s}</span>`).join('')}${m.map(s=>`<span class="tag tag-m">✗ ${s}</span>`).join('')}</div>
+          ${m.length?`<p style="font-size:.78rem;color:var(--s500);margin-bottom:.5rem">✗ = Missing section</p>`:''}`;
+        }},
+      { title:'Citation Consistency Check', icon:'📚', score:r.citations?.score||0, data:r.citations,
+        extra: () => r.citations?.citation_style_detected ? `<p style="font-size:.8rem;color:var(--s500);margin-bottom:.6rem">Detected style: <strong>${r.citations.citation_style_detected}</strong></p>` : ''},
+      { title:'Grammar & Language',          icon:'✏️', score:r.grammar?.score||0,  data:r.grammar,  extra:()=>'' },
+      { title:'Writing Style',               icon:'🎨', score:r.style?.score||0,    data:r.style,    extra:()=>'' },
+    ];
+
+    document.getElementById('feedback-sections').innerHTML = sections.map((sec,idx) => {
+      const issues = sec.data?.issues||[];
+      const badge = sec.score>=80 ? `<span class="sec-badge bg-green">Good (${sec.score})</span>`
+                  : sec.score>=60 ? `<span class="sec-badge bg-amber">Needs Work (${sec.score})</span>`
+                  :                 `<span class="sec-badge bg-red">Critical (${sec.score})</span>`;
+
+      const issuesHtml = !issues.length
+        ? `<div class="no-issues">🎉 No significant issues found.</div>`
+        : issues.map((item,i) => `
+          <div class="issue">
+            <div class="issue-head"><div class="issue-dot"></div><div class="issue-title">${esc(item.issue||'')}</div></div>
+            <div class="issue-body">
+              ${item.original?`<div class="issue-orig">"${esc(item.original)}"</div>`:''}
+              <div class="issue-why">💡 <span><strong>Why this matters:</strong> ${esc(item.why||'')}</span></div>
+              <button class="fix-btn" onclick="toggleFix(this)">💡 Show Suggested Fix</button>
+              <div class="fix-box">
+                <div class="fix-label">✅ Suggested Fix</div>
+                <div class="fix-text">${esc(item.suggested_fix||'No fix available.')}</div>
+                <button class="btn-copy" onclick="copyFix(this,'${escA(item.suggested_fix||'')}')">📋 Copy</button>
+              </div>
+            </div>
+          </div>`).join('');
+
+      return `<div class="sec-block" id="sec${idx}">
+        <div class="sec-head" onclick="toggleSec(${idx})">
+          <div class="sec-head-left"><span class="sec-icon">${sec.icon}</span><span class="sec-title">${sec.title}</span>${badge}</div>
+          <span class="sec-chev">▼</span>
+        </div>
+        <div class="sec-body">${sec.extra()}${issuesHtml}</div>
+      </div>`;
+    }).join('');
+
+    document.getElementById('sec0').classList.add('open');
+    document.getElementById('results').style.display = 'block';
+    document.getElementById('results').scrollIntoView({ behavior:'smooth' });
+  }
+
+  // ── Interactions ─────────────────────────────────────────────────────
+  function toggleSec(i) { document.getElementById('sec'+i).classList.toggle('open'); }
+
+  function toggleFix(btn) {
+    const box = btn.nextElementSibling;
+    const on = box.classList.toggle('on');
+    btn.textContent = on ? '🙈 Hide Fix' : '💡 Show Suggested Fix';
+  }
+
+  function copyFix(btn, text) {
+    navigator.clipboard.writeText(text).then(() => {
+      const o = btn.textContent; btn.textContent = '✅ Copied!';
+      setTimeout(() => btn.textContent = o, 1500);
+    });
+  }
+
+  function downloadReport() {
+    if (!currentId) return;
+    if (currentId === 0) { alert('Upload a real thesis to download a PDF report. Demo mode does not save reports.'); return; }
+    window.open('/download/' + currentId, '_blank');
+  }
+
+  function resetApp() {
+    document.getElementById('results').style.display = 'none';
+    document.getElementById('upload-section').style.display = 'block';
+    document.getElementById('err').style.display = 'none';
+    fileInput.value = ''; fileNameEl.textContent = ''; analyzeBtn.disabled = true; currentId = null;
+    window.scrollTo({ top:0, behavior:'smooth' });
+  }
+
+  function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function escA(s) { return String(s).replace(/'/g,"\\'").replace(/\n/g,' '); }
+</script>
+</body>
+</html>

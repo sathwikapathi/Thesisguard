@@ -1,0 +1,7 @@
+flask
+langchain
+langchain-google-genai
+google-generativeai
+PyMuPDF
+python-docx
+reportlab
